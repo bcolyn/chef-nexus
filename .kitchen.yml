@@ -1,9 +1,13 @@
 ---
 driver:
   name: vagrant
+  network:
+  - ["forwarded_port", {guest: 8080, host: 8080}]
 
 provisioner:
   name: chef_solo
+  solo_rb:
+    ssl_verify_mode: verify_peer
 
 platforms:
 #  - name: ubuntu-12.04
@@ -14,3 +18,10 @@ suites:
     run_list:
     - recipe[nexus::default]
     attributes:
+      java:
+        install_flavor: "oracle"
+        jdk_version: "7"
+        oracle:
+          accept_oracle_download_terms: true
+      tomcat:
+        base_version: 6
