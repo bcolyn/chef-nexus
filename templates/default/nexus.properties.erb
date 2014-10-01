@@ -1,0 +1,8 @@
+application-port=<%= node['nexus']['jetty_port'] %>
+application-host=<%= node['nexus']['jetty_iface'] %>
+nexus-webapp=${bundleBasedir}/nexus
+nexus-webapp-context-path=/nexus
+
+nexus-work=<%= node['nexus']['data_dir'] %>
+runtime=${bundleBasedir}/nexus/WEB-INF
+

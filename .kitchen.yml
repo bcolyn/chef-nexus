@@ -18,11 +18,10 @@ suites:
   - name: default
     run_list:
     - recipe[fixtures]
+    - recipe[nexus-oss::default]
     attributes:
       java:
         install_flavor: "oracle"
         jdk_version: "7"
         oracle:
           accept_oracle_download_terms: true
-      tomcat:
-        base_version: 6

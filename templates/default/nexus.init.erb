@@ -1,0 +1,136 @@
+#! /bin/sh
+#
+#	/etc/init.d/nexus
+#
+## Begin RHEL/CentOS
+# chkconfig:		345 99 20
+# description: 		Nexus OSS Maven repository
+## End RHEL/CentOS
+
+# Source function library
+. /etc/init.d/functions
+
+# Save internal variables
+DESC="Nexus OSS repository"
+NAME=nexus
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
+LOCKFILE=/var/lock/subsys/$NAME
+INSTALLDIR=<%= node['nexus']['install_dir'] %>
+
+# Chef Configurables
+export RUNASUSER=<%= node['nexus']['user'] %>
+export CMD=<%= node['nexus']['cmd'] %>
+export OPTS=<%= node['nexus']['opts'] %>
+
+# Tempvars
+bindir="$INSTALLDIR/bin"
+logdir="$INSTALLDIR/logs"
+
+pidfile=$logdir/pid
+logfile=$logdir/stdout.log
+errlogfile=$logdir/stderr.log
+
+start() {
+	check_running
+
+	[ $? == 0 ] && echo "$DESC is already up." && return 0
+
+	su -c "$bindir/$CMD $OPTS > $logfile 2>$errlogfile & echo \$! > $pidfile" $RUNASUSER
+	[ $? != 0 ] && return 0
+
+	touch $LOCKFILE
+
+	echo "Successfully started $cmd with PID $(cat $pidfile)!"
+}
+
+stop() {
+	# Make sure pid is still around
+	check_running
+
+	# Service not running
+	[ $? != 0 ] && echo "$DESC is not running." && return 0
+
+	# Process is alive, terminate
+	kill $pid
+	wait_for_pid
+	check_running
+
+	# Abort on error
+	[ $? != 0 ] && return 0
+
+	echo "Successfully stopped $DESC."
+}
+
+# Check for existing pidfile
+check_running() {
+	if [ -e "$pidfile" ] && [ -e $LOCKFILE ]; then
+		pid=$(cat $pidfile)
+		kill -0 $pid 2>/dev/null >/dev/null
+
+		# Return if process is live
+		[ $? == 0 ] && return 0
+	fi
+
+	# Clean up pid and lock, process is dead
+	rm -f $pidfile
+	rm -f $LOCKFILE
+
+	return 1
+}
+
+# Wait for pidfile
+wait_for_pid() {
+	pid=$(cat $pidfile)
+	waittime=20
+	if [ "x$2" != "x" ]; then
+		waittime=$2
+	fi
+
+	echo -n "Waiting for pid $pid to terminate."
+	COUNT=1
+	while [ $COUNT -lt $waittime ]
+	do
+		check_running
+		if [ $? != 0 ]
+			then
+			echo ".done"
+			rm -f $LOCKFILE
+			return 0
+		fi
+
+		echo -n "."
+		sleep 1
+		COUNT=$(expr $COUNT + 1)
+	done
+	echo "failed."
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart|force-reload)
+		stop
+		start
+		;;
+	status)
+		check_running
+		if [ $? == 0 ] ; then
+			echo "$DESC is running with PID $(cat $pidfile)"
+			exit 0
+		else
+			echo "$DESC is not running."
+			exit 1 # Exit with correct status, important for Chef
+		fi
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart|force-reload|status}" >&2
+		exit 3
+		;;
+esac
+
+exit $?

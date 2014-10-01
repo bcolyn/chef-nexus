@@ -1,2 +1,5 @@
 include_recipe "java"
-include_recipe "tomcat"
+
+directory "/data" do
+  action :create
+end

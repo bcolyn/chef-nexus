@@ -3,7 +3,7 @@ source "https://supermarket.getchef.com"
 metadata
 
 cookbook 'java', '~> 1.28.0'
-cookbook 'tomcat', '~> 0.16.2'
+cookbook 'ark', '0.9.0'
 
 # test fixture cookbooks for serverspec
 group :integration, :test do
