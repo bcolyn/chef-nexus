@@ -1,20 +1,55 @@
+.rake_test_cache
+*.lock
+!/Gemfile.lock
+!Berksfile.lock
+
+##############################
+# Chef key files and secrets #
+##############################
+.chef
+
+########
+# Chef #
+########
+.kitchen/
+.kitchen.local.yml
+
+# ignore the cookbooks
+# since we manage cookbook dependencies with Berkshelf for chef-server
+# and librarian-chef for Vagrant
+/cookbooks/
+
+###########
+# Vagrant #
+###########
+.vagrant
+tmp/
+
+#############
+# Berkshelf #
+#############
 *~
 *#
 .#*
 \#*#
 .*.sw[a-z]
 *.un~
-pkg/
-
-# Berkshelf
-.vagrant
 /cookbooks
-Berksfile.lock
 
-# Bundler
-Gemfile.lock
+###########
+# Bundler #
+###########
 bin/*
 .bundle/*
 
-.kitchen/
-.kitchen.local.yml
+######################
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
